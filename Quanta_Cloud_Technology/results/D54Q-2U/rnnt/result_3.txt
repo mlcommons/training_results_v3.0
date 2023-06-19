@@ -1,0 +1,638 @@
++ echo 'Beginning trial 4 of 10'
+Beginning trial 4 of 10
++ docker exec -it rnn_speech_recognition python -c ''
++ '[' 1 -eq 1 ']'
++ sync
++ sudo /sbin/sysctl vm.drop_caches=3
+vm.drop_caches = 3
++ docker exec -it rnn_speech_recognition python -c '
+from mlperf_logger import mllogger
+mllogger.event(key=mllogger.constants.CACHE_CLEAR, value=True)'
+:::MLLOG {"namespace": "", "time_ms": 1684423525727, "event_type": "POINT_IN_TIME", "key": "cache_clear", "value": true, "metadata": {"file": "<string>", "lineno": 3}}
++ docker exec -it '--env=Loading hyperparameters for GBS=512.' --env=AMP_LVL --env=APEX_JOINT --env=APEX_LOSS --env=AUDIO_RESAMPLING_DEVICE --env=BATCHSIZE --env=BATCH_EVAL_MODE --env=BETA1 --env=BETA2 --env=BUCKET --env=BUFFER_PREALLOC --env=DATA_CPU_THREADS --env=DELAY_ENCODER --env=DGXHT --env=DGXNGPU --env=DGXNNODES --env=DGXNSOCKET --env=DGXSOCKETCORES --env=DGXSYSTEM --env=DISABLE_FILE_LOGGING --env=DIST_LAMB --env=DIST_SAMPLER --env=EMA --env=EMA_UPDATE_TYPE --env=ENABLE_PREFETCH --env=EPOCH --env=EVAL_BATCHSIZE --env=FC_IMPL --env=FUSE_RELU_DROPOUT --env=HOLD_EPOCHS --env=LOG_FREQUENCY --env=LR --env=LR_DECAY_POWER --env=MAX_SYMBOL --env=MIN_SEQ_SPLIT_LEN --env=MULTILAYER_LSTM --env=MULTI_TENSOR_EMA --env=PRE_SORT_FOR_SEQ_SPLIT --env=TOKENIZED_TRANSCRIPT --env=VAL_FREQUENCY --env=VECTORIZED_SA --env=VECTORIZED_SAMPLER --env=WALLTIME --env=WARMUP --env=WEIGHTS_INIT_SCALE --env=MLPERF_HOST_OS rnn_speech_recognition python -m torch.distributed.run --standalone --no_python --nproc_per_node=2 ./run_and_time.sh
+master_addr is only used for static rdzv_backend and when rdzv_endpoint is not specified.
+WARNING:__main__:
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+./run_and_time.sh: line 24: [: : integer expression expected
+./run_and_time.sh: line 24: [: : integer expression expected
+STARTING TIMING RUN AT 2023-05-18 03:25:27 PM
+running benchmark
+STARTING TIMING RUN AT 2023-05-18 03:25:27 PM
+running benchmark
+bindpcie -- python -u
+bindpcie -- python -u
++ bindpcie -- python -u train.py --batch_size=256 --beta1=0.9 --beta2=0.9985 --max_duration=16.7 --val_batch_size=338 --target=0.058 --lr=0.0062 --min_lr=1e-5 --lr_exp_gamma=0.915 --epochs=70 --warmup_epochs=1 --hold_epochs=11 --epochs_this_job=0 --ema=0.994 --output_dir /results --model_config=configs/baseline_v3-1023sp.yaml --seed 11195 --dataset_dir=/datasets/LibriSpeech --cudnn_benchmark --dali_device gpu --audio_resampling_device gpu --weight_decay=1e-3 --log_frequency=1000 --val_frequency=1 --grad_accumulation_steps=1 --prediction_frequency=1000000 --weights_init_scale=0.45 --val_manifests=/metadata/librispeech-dev-clean-wav-tokenized.pkl --train_manifests /metadata/librispeech-train-clean-100-wav-tokenized.pkl /metadata/librispeech-train-clean-360-wav-tokenized.pkl /metadata/librispeech-train-other-500-wav-tokenized.pkl --num_buckets=1 --max_symbol_per_sample=300 --apex_transducer_loss=fp16 --fuse_relu_dropout --multi_tensor_ema --batch_eval_mode cg_unroll_pipeline --dist_lamb --apex_transducer_joint=pack_w_relu_dropout --fc_impl=apex_fused_dense --buffer_pre_alloc --ema_update_type=fp16 --amp_level 2 --data_cpu_threads 16 --min_seq_split_len 20 --dwu_group_size 2 --vectorized_sa --multilayer_lstm --enable_prefetch --tokenized_transcript --vectorized_sampler --dist_sampler --pre_sort_for_seq_split --dwu_overlap_reduction --disable_file_logging --delay_encoder
+num_gpus=2 num_sockets = 2 num_nodes=2 cores_per_socket=32
+num_gpus=2 num_sockets = 2 num_nodes=2 cores_per_socket=32
+[W init.cpp:833] Warning: Use _jit_set_fusion_strategy, bailout depth is deprecated. Setting to (STATIC, 20) (function operator())
+[W init.cpp:833] Warning: Use _jit_set_fusion_strategy, bailout depth is deprecated. Setting to (STATIC, 20) (function operator())
+:::MLLOG {"namespace": "", "time_ms": 1684423530187, "event_type": "INTERVAL_START", "key": "init_start", "value": null, "metadata": {"file": "train.py", "lineno": 363}}
+:::MLLOG {"namespace": "", "time_ms": 1684423530187, "event_type": "INTERVAL_START", "key": "init_start", "value": null, "metadata": {"file": "train.py", "lineno": 363}}
+Distributed training with 2 GPUs
+
+DLL 2023-05-18 15:25:31.555553 - PARAMETER | epochs :  70
+DLL 2023-05-18 15:25:31.555582 - PARAMETER | warmup_epochs :  1
+DLL 2023-05-18 15:25:31.555595 - PARAMETER | hold_epochs :  11
+DLL 2023-05-18 15:25:31.555602 - PARAMETER | epochs_this_job :  0
+DLL 2023-05-18 15:25:31.555610 - PARAMETER | steps_this_job : 
+DLL 2023-05-18 15:25:31.555618 - PARAMETER | cudnn_benchmark :  True
+DLL 2023-05-18 15:25:31.555628 - PARAMETER | amp_level :  2
+DLL 2023-05-18 15:25:31.555636 - PARAMETER | seed :  11195
+DLL 2023-05-18 15:25:31.555646 - PARAMETER | local_rank :  0
+DLL 2023-05-18 15:25:31.555653 - PARAMETER | target :  0.058
+DLL 2023-05-18 15:25:31.555664 - PARAMETER | apex_transducer_loss :  fp16
+DLL 2023-05-18 15:25:31.555671 - PARAMETER | fuse_relu_dropout :  True
+DLL 2023-05-18 15:25:31.555680 - PARAMETER | weights_init_scale :  0.45
+DLL 2023-05-18 15:25:31.555689 - PARAMETER | hidden_hidden_bias_scale : 
+DLL 2023-05-18 15:25:31.555696 - PARAMETER | batch_eval_mode :  cg_unroll_pipeline
+DLL 2023-05-18 15:25:31.555705 - PARAMETER | cg_unroll_factor :  4
+DLL 2023-05-18 15:25:31.555712 - PARAMETER | apex_transducer_joint :  pack_w_relu_dropout
+DLL 2023-05-18 15:25:31.555718 - PARAMETER | buffer_pre_alloc :  True
+DLL 2023-05-18 15:25:31.555725 - PARAMETER | multilayer_lstm :  True
+DLL 2023-05-18 15:25:31.555733 - PARAMETER | batch_split_factor :  1
+DLL 2023-05-18 15:25:31.555739 - PARAMETER | fc_impl :  apex_fused_dense
+DLL 2023-05-18 15:25:31.555747 - PARAMETER | delay_encoder :  True
+DLL 2023-05-18 15:25:31.555756 - PARAMETER | num_cg :  0
+DLL 2023-05-18 15:25:31.555765 - PARAMETER | min_seq_split_len :  20
+DLL 2023-05-18 15:25:31.555772 - PARAMETER | pre_sort_for_seq_split :  True
+DLL 2023-05-18 15:25:31.555778 - PARAMETER | batch_size :  256
+DLL 2023-05-18 15:25:31.555785 - PARAMETER | val_batch_size :  338
+DLL 2023-05-18 15:25:31.555793 - PARAMETER | lr :  0.0062
+DLL 2023-05-18 15:25:31.555801 - PARAMETER | min_lr :  1e-05
+DLL 2023-05-18 15:25:31.555811 - PARAMETER | lr_exp_gamma :  0.915
+DLL 2023-05-18 15:25:31.555818 - PARAMETER | weight_decay :  0.001
+DLL 2023-05-18 15:25:31.555826 - PARAMETER | grad_accumulation_steps :  1
+DLL 2023-05-18 15:25:31.555834 - PARAMETER | clip_norm :  1
+DLL 2023-05-18 15:25:31.555840 - PARAMETER | beta1 :  0.9
+DLL 2023-05-18 15:25:31.555847 - PARAMETER | beta2 :  0.9985
+DLL 2023-05-18 15:25:31.555855 - PARAMETER | ema :  0.994
+DLL 2023-05-18 15:25:31.555862 - PARAMETER | multi_tensor_ema :  True
+DLL 2023-05-18 15:25:31.555869 - PARAMETER | dist_lamb :  True
+DLL 2023-05-18 15:25:31.555875 - PARAMETER | ema_update_type :  fp16
+DLL 2023-05-18 15:25:31.555881 - PARAMETER | dwu_group_size :  2
+DLL 2023-05-18 15:25:31.555889 - PARAMETER | dwu_overlap_reduction :  True
+DLL 2023-05-18 15:25:31.555896 - PARAMETER | dali_device :  gpu
+DLL 2023-05-18 15:25:31.555904 - PARAMETER | audio_resampling_device :  gpu
+DLL 2023-05-18 15:25:31.555912 - PARAMETER | resume :  False
+DLL 2023-05-18 15:25:31.555918 - PARAMETER | ckpt : 
+DLL 2023-05-18 15:25:31.555924 - PARAMETER | save_at_the_end :  False
+DLL 2023-05-18 15:25:31.555932 - PARAMETER | save_frequency : 
+DLL 2023-05-18 15:25:31.555939 - PARAMETER | keep_milestones :  []
+DLL 2023-05-18 15:25:31.555946 - PARAMETER | save_best_from :  200
+DLL 2023-05-18 15:25:31.555952 - PARAMETER | val_frequency :  1
+DLL 2023-05-18 15:25:31.555958 - PARAMETER | log_frequency :  1000
+DLL 2023-05-18 15:25:31.555965 - PARAMETER | prediction_frequency :  1000000
+DLL 2023-05-18 15:25:31.555971 - PARAMETER | model_config :  configs/baseline_v3-1023sp.yaml
+DLL 2023-05-18 15:25:31.555979 - PARAMETER | num_buckets :  1
+DLL 2023-05-18 15:25:31.555988 - PARAMETER | vectorized_sampler :  True
+DLL 2023-05-18 15:25:31.555994 - PARAMETER | dist_sampler :  True
+DLL 2023-05-18 15:25:31.556001 - PARAMETER | train_manifests :  ['/metadata/librispeech-train-clean-100-wav-tokenized.pkl', '/metadata/librispeech-train-clean-360-wav-tokenized.pkl', '/metadata/librispeech-train-other-500-wav-tokenized.pkl']
+DLL 2023-05-18 15:25:31.556013 - PARAMETER | val_manifests :  ['/metadata/librispeech-dev-clean-wav-tokenized.pkl']
+DLL 2023-05-18 15:25:31.556022 - PARAMETER | max_duration :  16.7
+DLL 2023-05-18 15:25:31.556033 - PARAMETER | max_txt_len :  125
+DLL 2023-05-18 15:25:31.556040 - PARAMETER | max_eval_sample_duration :  32.7
+DLL 2023-05-18 15:25:31.556050 - PARAMETER | dataset_dir :  /datasets/LibriSpeech
+DLL 2023-05-18 15:25:31.556057 - PARAMETER | output_dir :  /results
+DLL 2023-05-18 15:25:31.556063 - PARAMETER | log_file : 
+DLL 2023-05-18 15:25:31.556070 - PARAMETER | max_symbol_per_sample :  300
+DLL 2023-05-18 15:25:31.556077 - PARAMETER | data_cpu_threads :  16
+DLL 2023-05-18 15:25:31.556085 - PARAMETER | synthetic_audio_seq_len : 
+DLL 2023-05-18 15:25:31.556094 - PARAMETER | synthetic_text_seq_len : 
+DLL 2023-05-18 15:25:31.556108 - PARAMETER | enable_seq_len_stats :  False
+DLL 2023-05-18 15:25:31.556116 - PARAMETER | vectorized_sa :  True
+DLL 2023-05-18 15:25:31.556126 - PARAMETER | in_mem_file_list :  False
+DLL 2023-05-18 15:25:31.556133 - PARAMETER | enable_prefetch :  True
+DLL 2023-05-18 15:25:31.556140 - PARAMETER | tokenized_transcript :  True
+DLL 2023-05-18 15:25:31.556150 - PARAMETER | dali_dont_use_mmap :  False
+DLL 2023-05-18 15:25:31.556159 - PARAMETER | disable_file_logging :  True
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "gradient_accumulation_steps", "value": 1, "metadata": {"file": "train.py", "lineno": 396}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "submission_benchmark", "value": "rnnt", "metadata": {"file": "train.py", "lineno": 402}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "submission_org", "value": "SUBMISSION_ORG_PLACEHOLDER", "metadata": {"file": "train.py", "lineno": 402}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "submission_division", "value": "closed", "metadata": {"file": "train.py", "lineno": 402}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "submission_status", "value": "onprem", "metadata": {"file": "train.py", "lineno": 402}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531568, "event_type": "POINT_IN_TIME", "key": "submission_platform", "value": "1xSUBMISSION_PLATFORM_PLACEHOLDER", "metadata": {"file": "train.py", "lineno": 402}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531571, "event_type": "POINT_IN_TIME", "key": "model_weights_initialization_scale", "value": 0.45, "metadata": {"file": "train.py", "lineno": 409}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531649, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/common/rnn.py", "lineno": 83, "tensor": "pre_rnn"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531781, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/common/rnn.py", "lineno": 83, "tensor": "post_rnn"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531784, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/rnnt/model.py", "lineno": 204, "tensor": "pred_embed"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531804, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/common/rnn.py", "lineno": 83, "tensor": "dec_rnn"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531805, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/rnnt/model.py", "lineno": 223, "tensor": "joint_pred"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531808, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/rnnt/model.py", "lineno": 227, "tensor": "joint_enc"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531812, "event_type": "POINT_IN_TIME", "key": "weights_initialization", "value": null, "metadata": {"file": "/workspace/rnnt/rnnt/model.py", "lineno": 250, "tensor": "joint_net"}}
+:::MLLOG {"namespace": "", "time_ms": 1684423531883, "event_type": "POINT_IN_TIME", "key": "eval_max_prediction_symbols", "value": 300, "metadata": {"file": "train.py", "lineno": 435}}
+Model size: 49.1M params
+
+:::MLLOG {"namespace": "", "time_ms": 1684423531887, "event_type": "POINT_IN_TIME", "key": "model_eval_ema_factor", "value": 0.994, "metadata": {"file": "train.py", "lineno": 449}}
+Starting with LRs: 0.006200000178068876
+:::MLLOG {"namespace": "", "time_ms": 1684423532378, "event_type": "POINT_IN_TIME", "key": "seed", "value": 11195, "metadata": {"file": "train.py", "lineno": 486}}
+Using master seed from command line: 11195
+Setting up datasets...
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_train_max_duration", "value": 16.7, "metadata": {"file": "train.py", "lineno": 510}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_speed_perturbaton_max", "value": 1.15, "metadata": {"file": "train.py", "lineno": 512}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_speed_perturbaton_min", "value": 0.85, "metadata": {"file": "train.py", "lineno": 514}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_freq_n", "value": 2, "metadata": {"file": "train.py", "lineno": 516}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_freq_min", "value": 0, "metadata": {"file": "train.py", "lineno": 518}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_freq_max", "value": 20, "metadata": {"file": "train.py", "lineno": 520}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_time_n", "value": 10, "metadata": {"file": "train.py", "lineno": 522}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_time_min", "value": 0, "metadata": {"file": "train.py", "lineno": 524}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "data_spec_augment_time_max", "value": 0.03, "metadata": {"file": "train.py", "lineno": 526}}
+:::MLLOG {"namespace": "", "time_ms": 1684423532419, "event_type": "POINT_IN_TIME", "key": "global_batch_size", "value": 512, "metadata": {"file": "train.py", "lineno": 528}}
+/usr/local/lib/python3.8/dist-packages/torch/cuda/amp/grad_scaler.py:342: FutureWarning: GradScaler is going to stop passing itself as a keyword argument to the passed optimizer. In the near future GradScaler registers `grad_scale: Tensor` and `found_inf: Tensor` to the passed optimizer and let the optimizer use them directly.
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/torch/cuda/amp/grad_scaler.py:342: FutureWarning: GradScaler is going to stop passing itself as a keyword argument to the passed optimizer. In the near future GradScaler registers `grad_scale: Tensor` and `found_inf: Tensor` to the passed optimizer and let the optimizer use them directly.
+  warnings.warn(
+:::MLLOG {"namespace": "", "time_ms": 1684423533254, "event_type": "INTERVAL_END", "key": "init_stop", "value": null, "metadata": {"file": "train.py", "lineno": 626}}
+:::MLLOG {"namespace": "", "time_ms": 1684423533254, "event_type": "INTERVAL_START", "key": "run_start", "value": null, "metadata": {"file": "train.py", "lineno": 626}}
+:::MLLOG {"namespace": "", "time_ms": 1684423533254, "event_type": "POINT_IN_TIME", "key": "data_train_num_buckets", "value": 1, "metadata": {"file": "train.py", "lineno": 630}}
+Launching vectorized bucketing sampler
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/ops.py:653: DeprecationWarning: WARNING: `audio_resample` is now deprecated. Use `audio_resample` instead.
+This operator was moved out from the experimental phase, and is now a regular DALI operator. This is just an deprecated alias kept for backward compatibility.
+  op_instances.append(_OperatorInstance(input_set, self, **kwargs))
+Launching simple sampler
+Dataset read by DALI. Number of samples: 278528
+Initializing DALI with parameters:
+	           dither : 1e-05
+	    dont_use_mmap : False
+	        file_root : /datasets/LibriSpeech
+	     gpu_pipeline : True
+	   gpu_resampling : True
+	 in_mem_file_list : False
+	             nfft : 512
+	          nfilter : 80
+	   resample_range : [0.85, 1.15]
+	      sample_rate : 16000
+	          sampler : <common.data.dali.sampler.VectorizedBucketingSampler object at 0x7f4199ecefa0>
+	   spect_wind_len : 320.0
+	  spect_wind_step : 160.0
+	synthetic_seq_len : None
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/ops.py:653: DeprecationWarning: WARNING: `audio_resample` is now deprecated. Use `audio_resample` instead.
+This operator was moved out from the experimental phase, and is now a regular DALI operator. This is just an deprecated alias kept for backward compatibility.
+  op_instances.append(_OperatorInstance(input_set, self, **kwargs))
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/plugin/base_iterator.py:192: Warning: Please set `reader_name` and don't set last_batch_padded and size manually whenever possible. This may lead, in some situations, to missing some samples or returning duplicated ones. Check the Sharding section of the documentation for more details.
+  _iterator_deprecation_warning()
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/plugin/base_iterator.py:192: Warning: Please set `reader_name` and don't set last_batch_padded and size manually whenever possible. This may lead, in some situations, to missing some samples or returning duplicated ones. Check the Sharding section of the documentation for more details.
+  _iterator_deprecation_warning()
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/ops.py:653: DeprecationWarning: WARNING: `audio_resample` is now deprecated. Use `audio_resample` instead.
+This operator was moved out from the experimental phase, and is now a regular DALI operator. This is just an deprecated alias kept for backward compatibility.
+  op_instances.append(_OperatorInstance(input_set, self, **kwargs))
+Dataset read by DALI. Number of samples: 2703
+Initializing DALI with parameters:
+	           dither : 1e-05
+	    dont_use_mmap : False
+	        file_root : /datasets/LibriSpeech
+	     gpu_pipeline : True
+	   gpu_resampling : True
+	 in_mem_file_list : False
+	             nfft : 512
+	          nfilter : 80
+	   resample_range : None
+	      sample_rate : 16000
+	          sampler : <common.data.dali.sampler.SimpleSampler object at 0x7f4199ecef70>
+	   spect_wind_len : 320.0
+	  spect_wind_step : 160.0
+	synthetic_seq_len : None
+/usr/local/lib/python3.8/dist-packages/nvidia/dali/ops.py:653: DeprecationWarning: WARNING: `audio_resample` is now deprecated. Use `audio_resample` instead.
+This operator was moved out from the experimental phase, and is now a regular DALI operator. This is just an deprecated alias kept for backward compatibility.
+  op_instances.append(_OperatorInstance(input_set, self, **kwargs))
+:::MLLOG {"namespace": "", "time_ms": 1684423540463, "event_type": "POINT_IN_TIME", "key": "train_samples", "value": 278528, "metadata": {"file": "train.py", "lineno": 716}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540463, "event_type": "POINT_IN_TIME", "key": "eval_samples", "value": 2703, "metadata": {"file": "train.py", "lineno": 717}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540463, "event_type": "POINT_IN_TIME", "key": "opt_name", "value": "lamb", "metadata": {"file": "train.py", "lineno": 719}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_base_learning_rate", "value": 0.0062, "metadata": {"file": "train.py", "lineno": 720}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_epsilon", "value": 1e-09, "metadata": {"file": "train.py", "lineno": 721}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_learning_rate_decay_poly_power", "value": 0.915, "metadata": {"file": "train.py", "lineno": 722}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_learning_rate_warmup_epochs", "value": 1, "metadata": {"file": "train.py", "lineno": 723}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_learning_rate_hold_epochs", "value": 11, "metadata": {"file": "train.py", "lineno": 724}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_beta_1", "value": 0.9, "metadata": {"file": "train.py", "lineno": 725}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_beta_2", "value": 0.9985, "metadata": {"file": "train.py", "lineno": 726}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_gradient_clip_norm", "value": 1, "metadata": {"file": "train.py", "lineno": 727}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_learning_rate_alt_decay_func", "value": true, "metadata": {"file": "train.py", "lineno": 728}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_learning_rate_alt_warmup_func", "value": true, "metadata": {"file": "train.py", "lineno": 729}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_lamb_learning_rate_min", "value": 1e-05, "metadata": {"file": "train.py", "lineno": 730}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540464, "event_type": "POINT_IN_TIME", "key": "opt_weight_decay", "value": 0.001, "metadata": {"file": "train.py", "lineno": 731}}
+Pre-allocate buffer with max_seq_len of 1921 and max_txt_len of 125
+/usr/local/lib/python3.8/dist-packages/torch/cuda/amp/grad_scaler.py:342: FutureWarning: GradScaler is going to stop passing itself as a keyword argument to the passed optimizer. In the near future GradScaler registers `grad_scale: Tensor` and `found_inf: Tensor` to the passed optimizer and let the optimizer use them directly.
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/torch/cuda/amp/grad_scaler.py:342: FutureWarning: GradScaler is going to stop passing itself as a keyword argument to the passed optimizer. In the near future GradScaler registers `grad_scale: Tensor` and `found_inf: Tensor` to the passed optimizer and let the optimizer use them directly.
+  warnings.warn(
+:::MLLOG {"namespace": "", "time_ms": 1684423540843, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 1, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423540843, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423648517, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 1}}
+DLL 2023-05-18 15:27:28.517806 - epoch    1 | avg train utts/s  2587 | took 107.67 s
+:::MLLOG {"namespace": "", "time_ms": 1684423648517, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2586.7611096566043}, "metadata": {"file": "train.py", "lineno": 905, "step": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423648517, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423649411, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.9773905371126062, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423649411, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 1}}
+DLL 2023-05-18 15:27:29.411674 - epoch    1 |   dev ema wer  97.74 | took  0.89 s
+:::MLLOG {"namespace": "", "time_ms": 1684423649411, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423649411, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 2, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423649411, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 2}}
+DLL 2023-05-18 15:29:01.246773 - epoch    2 | iter  456/544 | loss  198.62 | utts/s     6 | took 91.78 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684423759031, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 2}}
+DLL 2023-05-18 15:29:19.031545 - epoch    2 | avg train utts/s  2541 | took 109.62 s
+:::MLLOG {"namespace": "", "time_ms": 1684423759031, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2540.8616463003136}, "metadata": {"file": "train.py", "lineno": 905, "step": 2}}
+:::MLLOG {"namespace": "", "time_ms": 1684423759031, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 2}}
+:::MLLOG {"namespace": "", "time_ms": 1684423759909, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 1.0, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 2}}
+:::MLLOG {"namespace": "", "time_ms": 1684423759909, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 2}}
+DLL 2023-05-18 15:29:19.909417 - epoch    2 |   dev ema wer 100.00 | took  0.88 s
+:::MLLOG {"namespace": "", "time_ms": 1684423759909, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 2}}
+:::MLLOG {"namespace": "", "time_ms": 1684423759909, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 3, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423759909, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 3}}
+:::MLLOG {"namespace": "", "time_ms": 1684423869974, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 3}}
+DLL 2023-05-18 15:31:09.975267 - epoch    3 | avg train utts/s  2531 | took 110.07 s
+:::MLLOG {"namespace": "", "time_ms": 1684423869975, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2530.565374559052}, "metadata": {"file": "train.py", "lineno": 905, "step": 3}}
+:::MLLOG {"namespace": "", "time_ms": 1684423869975, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 3}}
+:::MLLOG {"namespace": "", "time_ms": 1684423871030, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.6993676703062387, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 3}}
+:::MLLOG {"namespace": "", "time_ms": 1684423871030, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 3}}
+DLL 2023-05-18 15:31:11.030390 - epoch    3 |   dev ema wer  69.94 | took  1.05 s
+:::MLLOG {"namespace": "", "time_ms": 1684423871030, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 3}}
+:::MLLOG {"namespace": "", "time_ms": 1684423871030, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 4, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423871030, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 4}}
+DLL 2023-05-18 15:32:25.365719 - epoch    4 | iter  368/544 | loss   60.66 | utts/s     7 | took 74.28 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684423980956, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 4}}
+DLL 2023-05-18 15:33:00.956433 - epoch    4 | avg train utts/s  2534 | took 109.93 s
+:::MLLOG {"namespace": "", "time_ms": 1684423980956, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2533.7863497311264}, "metadata": {"file": "train.py", "lineno": 905, "step": 4}}
+:::MLLOG {"namespace": "", "time_ms": 1684423980956, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 4}}
+:::MLLOG {"namespace": "", "time_ms": 1684423982110, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.2764604242491085, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 4}}
+:::MLLOG {"namespace": "", "time_ms": 1684423982110, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 4}}
+DLL 2023-05-18 15:33:02.110984 - epoch    4 |   dev ema wer  27.65 | took  1.15 s
+:::MLLOG {"namespace": "", "time_ms": 1684423982111, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 4}}
+:::MLLOG {"namespace": "", "time_ms": 1684423982111, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 5, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684423982111, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 5}}
+:::MLLOG {"namespace": "", "time_ms": 1684424091956, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 5}}
+DLL 2023-05-18 15:34:51.956590 - epoch    5 | avg train utts/s  2536 | took 109.85 s
+:::MLLOG {"namespace": "", "time_ms": 1684424091956, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2535.642968610939}, "metadata": {"file": "train.py", "lineno": 905, "step": 5}}
+:::MLLOG {"namespace": "", "time_ms": 1684424091956, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 5}}
+:::MLLOG {"namespace": "", "time_ms": 1684424093125, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.17870666519613249, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 5}}
+:::MLLOG {"namespace": "", "time_ms": 1684424093126, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 5}}
+DLL 2023-05-18 15:34:53.126170 - epoch    5 |   dev ema wer  17.87 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424093126, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 5}}
+:::MLLOG {"namespace": "", "time_ms": 1684424093126, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 6, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424093126, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 6}}
+DLL 2023-05-18 15:35:49.663613 - epoch    6 | iter  280/544 | loss   42.72 | utts/s     9 | took 56.49 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684424202916, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 6}}
+DLL 2023-05-18 15:36:42.917315 - epoch    6 | avg train utts/s  2537 | took 109.79 s
+:::MLLOG {"namespace": "", "time_ms": 1684424202917, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2536.90089144567}, "metadata": {"file": "train.py", "lineno": 905, "step": 6}}
+:::MLLOG {"namespace": "", "time_ms": 1684424202917, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 6}}
+:::MLLOG {"namespace": "", "time_ms": 1684424204080, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.14207198264769677, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 6}}
+:::MLLOG {"namespace": "", "time_ms": 1684424204080, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 6}}
+DLL 2023-05-18 15:36:44.080968 - epoch    6 |   dev ema wer  14.21 | took  1.16 s
+:::MLLOG {"namespace": "", "time_ms": 1684424204081, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 6}}
+:::MLLOG {"namespace": "", "time_ms": 1684424204081, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 7, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424204081, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 7}}
+:::MLLOG {"namespace": "", "time_ms": 1684424313670, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 7}}
+DLL 2023-05-18 15:38:33.670329 - epoch    7 | avg train utts/s  2542 | took 109.59 s
+:::MLLOG {"namespace": "", "time_ms": 1684424313670, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2541.572243372685}, "metadata": {"file": "train.py", "lineno": 905, "step": 7}}
+:::MLLOG {"namespace": "", "time_ms": 1684424313670, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 7}}
+:::MLLOG {"namespace": "", "time_ms": 1684424314842, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.1255468548950406, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 7}}
+:::MLLOG {"namespace": "", "time_ms": 1684424314842, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 7}}
+DLL 2023-05-18 15:38:34.842859 - epoch    7 |   dev ema wer  12.55 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424314843, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 7}}
+:::MLLOG {"namespace": "", "time_ms": 1684424314843, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 8, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424314843, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 8}}
+DLL 2023-05-18 15:39:13.543655 - epoch    8 | iter  192/544 | loss   40.56 | utts/s    13 | took 38.65 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684424424439, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 8}}
+DLL 2023-05-18 15:40:24.440150 - epoch    8 | avg train utts/s  2541 | took 109.60 s
+:::MLLOG {"namespace": "", "time_ms": 1684424424440, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2541.3883219780873}, "metadata": {"file": "train.py", "lineno": 905, "step": 8}}
+:::MLLOG {"namespace": "", "time_ms": 1684424424440, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 8}}
+:::MLLOG {"namespace": "", "time_ms": 1684424425607, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.11282673431123856, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 8}}
+:::MLLOG {"namespace": "", "time_ms": 1684424425607, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 8}}
+DLL 2023-05-18 15:40:25.607790 - epoch    8 |   dev ema wer  11.28 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424425608, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 8}}
+:::MLLOG {"namespace": "", "time_ms": 1684424425608, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 9, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424425608, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 9}}
+:::MLLOG {"namespace": "", "time_ms": 1684424535297, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 9}}
+DLL 2023-05-18 15:42:15.297558 - epoch    9 | avg train utts/s  2539 | took 109.69 s
+:::MLLOG {"namespace": "", "time_ms": 1684424535297, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2539.246158386633}, "metadata": {"file": "train.py", "lineno": 905, "step": 9}}
+:::MLLOG {"namespace": "", "time_ms": 1684424535297, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 9}}
+:::MLLOG {"namespace": "", "time_ms": 1684424536472, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.10872762030807691, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 9}}
+:::MLLOG {"namespace": "", "time_ms": 1684424536473, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 9}}
+DLL 2023-05-18 15:42:16.473270 - epoch    9 |   dev ema wer  10.87 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684424536473, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 9}}
+:::MLLOG {"namespace": "", "time_ms": 1684424536473, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 10, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424536473, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 10}}
+DLL 2023-05-18 15:42:37.485065 - epoch   10 | iter  104/544 | loss   40.50 | utts/s    24 | took 20.96 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684424646118, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 10}}
+DLL 2023-05-18 15:44:06.118922 - epoch   10 | avg train utts/s  2540 | took 109.65 s
+:::MLLOG {"namespace": "", "time_ms": 1684424646118, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2540.2672068850516}, "metadata": {"file": "train.py", "lineno": 905, "step": 10}}
+:::MLLOG {"namespace": "", "time_ms": 1684424646119, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 10}}
+:::MLLOG {"namespace": "", "time_ms": 1684424647289, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.10639314731076063, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 10}}
+:::MLLOG {"namespace": "", "time_ms": 1684424647289, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 10}}
+DLL 2023-05-18 15:44:07.289629 - epoch   10 |   dev ema wer  10.64 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424647289, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 10}}
+:::MLLOG {"namespace": "", "time_ms": 1684424647290, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 11, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424647290, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 11}}
+:::MLLOG {"namespace": "", "time_ms": 1684424757285, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 11}}
+DLL 2023-05-18 15:45:57.285349 - epoch   11 | avg train utts/s  2532 | took 110.00 s
+:::MLLOG {"namespace": "", "time_ms": 1684424757285, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2532.1834604209066}, "metadata": {"file": "train.py", "lineno": 905, "step": 11}}
+:::MLLOG {"namespace": "", "time_ms": 1684424757285, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 11}}
+:::MLLOG {"namespace": "", "time_ms": 1684424758461, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.10495937649351127, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 11}}
+:::MLLOG {"namespace": "", "time_ms": 1684424758461, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 11}}
+DLL 2023-05-18 15:45:58.461584 - epoch   11 |   dev ema wer  10.50 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684424758461, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 11}}
+:::MLLOG {"namespace": "", "time_ms": 1684424758461, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 12, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424758462, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 12}}
+DLL 2023-05-18 15:46:01.674324 - epoch   12 | iter   16/544 | loss   41.09 | utts/s   162 | took  3.16 s | lrate 6.20e-03
+:::MLLOG {"namespace": "", "time_ms": 1684424868166, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 12}}
+DLL 2023-05-18 15:47:48.166395 - epoch   12 | avg train utts/s  2539 | took 109.70 s
+:::MLLOG {"namespace": "", "time_ms": 1684424868166, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2538.8970800798693}, "metadata": {"file": "train.py", "lineno": 905, "step": 12}}
+:::MLLOG {"namespace": "", "time_ms": 1684424868166, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 12}}
+:::MLLOG {"namespace": "", "time_ms": 1684424869332, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.10269843020477189, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 12}}
+:::MLLOG {"namespace": "", "time_ms": 1684424869332, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 12}}
+DLL 2023-05-18 15:47:49.332644 - epoch   12 |   dev ema wer  10.27 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424869332, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 12}}
+:::MLLOG {"namespace": "", "time_ms": 1684424869333, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 13, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424869333, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 13}}
+DLL 2023-05-18 15:49:24.450734 - epoch   13 | iter  472/544 | loss   41.12 | utts/s     5 | took 95.06 s | lrate 5.67e-03
+:::MLLOG {"namespace": "", "time_ms": 1684424978891, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 13}}
+DLL 2023-05-18 15:49:38.891782 - epoch   13 | avg train utts/s  2542 | took 109.56 s
+:::MLLOG {"namespace": "", "time_ms": 1684424978891, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2542.2740154236412}, "metadata": {"file": "train.py", "lineno": 905, "step": 13}}
+:::MLLOG {"namespace": "", "time_ms": 1684424978891, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 13}}
+:::MLLOG {"namespace": "", "time_ms": 1684424980065, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.09881989632734091, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 13}}
+:::MLLOG {"namespace": "", "time_ms": 1684424980065, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 13}}
+DLL 2023-05-18 15:49:40.065365 - epoch   13 |   dev ema wer   9.88 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684424980065, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 13}}
+:::MLLOG {"namespace": "", "time_ms": 1684424980065, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 14, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684424980065, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 14}}
+:::MLLOG {"namespace": "", "time_ms": 1684425089601, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 14}}
+DLL 2023-05-18 15:51:29.602147 - epoch   14 | avg train utts/s  2543 | took 109.54 s
+:::MLLOG {"namespace": "", "time_ms": 1684425089602, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2542.792011746664}, "metadata": {"file": "train.py", "lineno": 905, "step": 14}}
+:::MLLOG {"namespace": "", "time_ms": 1684425089602, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 14}}
+:::MLLOG {"namespace": "", "time_ms": 1684425090765, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.09494136244990993, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 14}}
+:::MLLOG {"namespace": "", "time_ms": 1684425090765, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 14}}
+DLL 2023-05-18 15:51:30.765376 - epoch   14 |   dev ema wer   9.49 | took  1.16 s
+:::MLLOG {"namespace": "", "time_ms": 1684425090765, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 14}}
+:::MLLOG {"namespace": "", "time_ms": 1684425090765, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 15, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425090765, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 15}}
+DLL 2023-05-18 15:52:48.030315 - epoch   15 | iter  384/544 | loss   38.75 | utts/s     7 | took 77.21 s | lrate 4.75e-03
+:::MLLOG {"namespace": "", "time_ms": 1684425200177, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 15}}
+DLL 2023-05-18 15:53:20.178289 - epoch   15 | avg train utts/s  2546 | took 109.41 s
+:::MLLOG {"namespace": "", "time_ms": 1684425200178, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2545.6712566615406}, "metadata": {"file": "train.py", "lineno": 905, "step": 15}}
+:::MLLOG {"namespace": "", "time_ms": 1684425200178, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 15}}
+:::MLLOG {"namespace": "", "time_ms": 1684425201346, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.0923127826182861, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 15}}
+:::MLLOG {"namespace": "", "time_ms": 1684425201346, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 15}}
+DLL 2023-05-18 15:53:21.347029 - epoch   15 |   dev ema wer   9.23 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684425201347, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 15}}
+:::MLLOG {"namespace": "", "time_ms": 1684425201347, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 16, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425201347, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 16}}
+:::MLLOG {"namespace": "", "time_ms": 1684425310822, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 16}}
+DLL 2023-05-18 15:55:10.822466 - epoch   16 | avg train utts/s  2544 | took 109.47 s
+:::MLLOG {"namespace": "", "time_ms": 1684425310822, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2544.217028260799}, "metadata": {"file": "train.py", "lineno": 905, "step": 16}}
+:::MLLOG {"namespace": "", "time_ms": 1684425310822, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 16}}
+:::MLLOG {"namespace": "", "time_ms": 1684425311988, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.08964743943237381, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 16}}
+:::MLLOG {"namespace": "", "time_ms": 1684425311988, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 16}}
+DLL 2023-05-18 15:55:11.988387 - epoch   16 |   dev ema wer   8.96 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684425311988, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 16}}
+:::MLLOG {"namespace": "", "time_ms": 1684425311988, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 17, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425311988, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 17}}
+DLL 2023-05-18 15:56:11.595501 - epoch   17 | iter  296/544 | loss   33.66 | utts/s     9 | took 59.55 s | lrate 3.98e-03
+:::MLLOG {"namespace": "", "time_ms": 1684425421445, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 17}}
+DLL 2023-05-18 15:57:01.446117 - epoch   17 | avg train utts/s  2545 | took 109.46 s
+:::MLLOG {"namespace": "", "time_ms": 1684425421446, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2544.6292042746404}, "metadata": {"file": "train.py", "lineno": 905, "step": 17}}
+:::MLLOG {"namespace": "", "time_ms": 1684425421446, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 17}}
+:::MLLOG {"namespace": "", "time_ms": 1684425422620, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.08512554685489504, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 17}}
+:::MLLOG {"namespace": "", "time_ms": 1684425422621, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 17}}
+DLL 2023-05-18 15:57:02.621160 - epoch   17 |   dev ema wer   8.51 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684425422621, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 17}}
+:::MLLOG {"namespace": "", "time_ms": 1684425422621, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 18, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425422621, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 18}}
+:::MLLOG {"namespace": "", "time_ms": 1684425532088, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 18}}
+DLL 2023-05-18 15:58:52.088692 - epoch   18 | avg train utts/s  2544 | took 109.47 s
+:::MLLOG {"namespace": "", "time_ms": 1684425532088, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2544.4003950733104}, "metadata": {"file": "train.py", "lineno": 905, "step": 18}}
+:::MLLOG {"namespace": "", "time_ms": 1684425532088, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 18}}
+:::MLLOG {"namespace": "", "time_ms": 1684425533252, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.08218447851181941, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 18}}
+:::MLLOG {"namespace": "", "time_ms": 1684425533252, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 18}}
+DLL 2023-05-18 15:58:53.253079 - epoch   18 |   dev ema wer   8.22 | took  1.16 s
+:::MLLOG {"namespace": "", "time_ms": 1684425533253, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 18}}
+:::MLLOG {"namespace": "", "time_ms": 1684425533253, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 19, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425533253, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 19}}
+DLL 2023-05-18 15:59:35.137526 - epoch   19 | iter  208/544 | loss   30.84 | utts/s    12 | took 41.83 s | lrate 3.33e-03
+:::MLLOG {"namespace": "", "time_ms": 1684425642692, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 19}}
+DLL 2023-05-18 16:00:42.692853 - epoch   19 | avg train utts/s  2545 | took 109.44 s
+:::MLLOG {"namespace": "", "time_ms": 1684425642692, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2545.0465427144068}, "metadata": {"file": "train.py", "lineno": 905, "step": 19}}
+:::MLLOG {"namespace": "", "time_ms": 1684425642693, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 19}}
+:::MLLOG {"namespace": "", "time_ms": 1684425643871, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.07928017352303224, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 19}}
+:::MLLOG {"namespace": "", "time_ms": 1684425643872, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 19}}
+DLL 2023-05-18 16:00:43.872154 - epoch   19 |   dev ema wer   7.93 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684425643872, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 19}}
+:::MLLOG {"namespace": "", "time_ms": 1684425643872, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 20, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425643872, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 20}}
+:::MLLOG {"namespace": "", "time_ms": 1684425753521, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 20}}
+DLL 2023-05-18 16:02:33.521356 - epoch   20 | avg train utts/s  2540 | took 109.65 s
+:::MLLOG {"namespace": "", "time_ms": 1684425753521, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2540.1847738698875}, "metadata": {"file": "train.py", "lineno": 905, "step": 20}}
+:::MLLOG {"namespace": "", "time_ms": 1684425753521, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 20}}
+:::MLLOG {"namespace": "", "time_ms": 1684425754691, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.07630234182566817, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 20}}
+:::MLLOG {"namespace": "", "time_ms": 1684425754691, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 20}}
+DLL 2023-05-18 16:02:34.691381 - epoch   20 |   dev ema wer   7.63 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684425754691, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 20}}
+:::MLLOG {"namespace": "", "time_ms": 1684425754691, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 21, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425754691, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 21}}
+DLL 2023-05-18 16:02:58.920930 - epoch   21 | iter  120/544 | loss   30.67 | utts/s    21 | took 24.18 s | lrate 2.79e-03
+:::MLLOG {"namespace": "", "time_ms": 1684425864238, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 21}}
+DLL 2023-05-18 16:04:24.238859 - epoch   21 | avg train utts/s  2543 | took 109.55 s
+:::MLLOG {"namespace": "", "time_ms": 1684425864238, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2542.5443365790907}, "metadata": {"file": "train.py", "lineno": 905, "step": 21}}
+:::MLLOG {"namespace": "", "time_ms": 1684425864239, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 21}}
+:::MLLOG {"namespace": "", "time_ms": 1684425865416, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.073728907025477, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 21}}
+:::MLLOG {"namespace": "", "time_ms": 1684425865417, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 21}}
+DLL 2023-05-18 16:04:25.417341 - epoch   21 |   dev ema wer   7.37 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684425865417, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 21}}
+:::MLLOG {"namespace": "", "time_ms": 1684425865417, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 22, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425865417, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 22}}
+:::MLLOG {"namespace": "", "time_ms": 1684425974897, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 22}}
+DLL 2023-05-18 16:06:14.897364 - epoch   22 | avg train utts/s  2544 | took 109.48 s
+:::MLLOG {"namespace": "", "time_ms": 1684425974897, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2544.1101434383245}, "metadata": {"file": "train.py", "lineno": 905, "step": 22}}
+:::MLLOG {"namespace": "", "time_ms": 1684425974897, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 22}}
+:::MLLOG {"namespace": "", "time_ms": 1684425976069, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.07143119738244917, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 22}}
+:::MLLOG {"namespace": "", "time_ms": 1684425976069, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 22}}
+DLL 2023-05-18 16:06:16.069903 - epoch   22 |   dev ema wer   7.14 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684425976070, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 22}}
+:::MLLOG {"namespace": "", "time_ms": 1684425976070, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 23, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684425976070, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 23}}
+DLL 2023-05-18 16:06:22.508459 - epoch   23 | iter   32/544 | loss   28.61 | utts/s    80 | took  6.39 s | lrate 2.33e-03
+:::MLLOG {"namespace": "", "time_ms": 1684426085634, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 23}}
+DLL 2023-05-18 16:08:05.635270 - epoch   23 | avg train utts/s  2542 | took 109.56 s
+:::MLLOG {"namespace": "", "time_ms": 1684426085635, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2542.1293395399157}, "metadata": {"file": "train.py", "lineno": 905, "step": 23}}
+:::MLLOG {"namespace": "", "time_ms": 1684426085635, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 23}}
+:::MLLOG {"namespace": "", "time_ms": 1684426086812, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.07043858681666115, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 23}}
+:::MLLOG {"namespace": "", "time_ms": 1684426086812, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 23}}
+DLL 2023-05-18 16:08:06.812511 - epoch   23 |   dev ema wer   7.04 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684426086812, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 23}}
+:::MLLOG {"namespace": "", "time_ms": 1684426086812, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 24, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426086812, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 24}}
+DLL 2023-05-18 16:09:45.191418 - epoch   24 | iter  488/544 | loss   25.69 | utts/s     5 | took 98.33 s | lrate 2.14e-03
+:::MLLOG {"namespace": "", "time_ms": 1684426196437, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 24}}
+DLL 2023-05-18 16:09:56.437372 - epoch   24 | avg train utts/s  2541 | took 109.62 s
+:::MLLOG {"namespace": "", "time_ms": 1684426196437, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2540.7491471736694}, "metadata": {"file": "train.py", "lineno": 905, "step": 24}}
+:::MLLOG {"namespace": "", "time_ms": 1684426196437, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 24}}
+:::MLLOG {"namespace": "", "time_ms": 1684426197599, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.0682879305907871, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 24}}
+:::MLLOG {"namespace": "", "time_ms": 1684426197600, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 24}}
+DLL 2023-05-18 16:09:57.600134 - epoch   24 |   dev ema wer   6.83 | took  1.16 s
+:::MLLOG {"namespace": "", "time_ms": 1684426197600, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 24}}
+:::MLLOG {"namespace": "", "time_ms": 1684426197600, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 25, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426197600, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 25}}
+:::MLLOG {"namespace": "", "time_ms": 1684426307408, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 25}}
+DLL 2023-05-18 16:11:47.408689 - epoch   25 | avg train utts/s  2536 | took 109.81 s
+:::MLLOG {"namespace": "", "time_ms": 1684426307408, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2536.498925303902}, "metadata": {"file": "train.py", "lineno": 905, "step": 25}}
+:::MLLOG {"namespace": "", "time_ms": 1684426307408, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 25}}
+:::MLLOG {"namespace": "", "time_ms": 1684426308583, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06661519797066284, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 25}}
+:::MLLOG {"namespace": "", "time_ms": 1684426308583, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 25}}
+DLL 2023-05-18 16:11:48.583477 - epoch   25 |   dev ema wer   6.66 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684426308583, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 25}}
+:::MLLOG {"namespace": "", "time_ms": 1684426308583, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 26, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426308583, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 26}}
+DLL 2023-05-18 16:13:09.358631 - epoch   26 | iter  400/544 | loss   25.66 | utts/s     6 | took 80.73 s | lrate 1.79e-03
+:::MLLOG {"namespace": "", "time_ms": 1684426418383, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 26}}
+DLL 2023-05-18 16:13:38.384311 - epoch   26 | avg train utts/s  2537 | took 109.80 s
+:::MLLOG {"namespace": "", "time_ms": 1684426418384, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2536.677006101384}, "metadata": {"file": "train.py", "lineno": 905, "step": 26}}
+:::MLLOG {"namespace": "", "time_ms": 1684426418384, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 26}}
+:::MLLOG {"namespace": "", "time_ms": 1684426419549, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06575125914488437, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 26}}
+:::MLLOG {"namespace": "", "time_ms": 1684426419549, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 26}}
+DLL 2023-05-18 16:13:39.549946 - epoch   26 |   dev ema wer   6.58 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684426419550, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 26}}
+:::MLLOG {"namespace": "", "time_ms": 1684426419550, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 27, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426419550, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 27}}
+:::MLLOG {"namespace": "", "time_ms": 1684426529354, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 27}}
+DLL 2023-05-18 16:15:29.354555 - epoch   27 | avg train utts/s  2537 | took 109.80 s
+:::MLLOG {"namespace": "", "time_ms": 1684426529354, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2536.590240017364}, "metadata": {"file": "train.py", "lineno": 905, "step": 27}}
+:::MLLOG {"namespace": "", "time_ms": 1684426529354, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 27}}
+:::MLLOG {"namespace": "", "time_ms": 1684426530527, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06376603801330834, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 27}}
+:::MLLOG {"namespace": "", "time_ms": 1684426530527, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 27}}
+DLL 2023-05-18 16:15:30.527653 - epoch   27 |   dev ema wer   6.38 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684426530527, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 27}}
+:::MLLOG {"namespace": "", "time_ms": 1684426530528, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 28, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426530528, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 28}}
+DLL 2023-05-18 16:16:33.387339 - epoch   28 | iter  312/544 | loss   24.72 | utts/s     8 | took 62.81 s | lrate 1.50e-03
+:::MLLOG {"namespace": "", "time_ms": 1684426640227, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 28}}
+DLL 2023-05-18 16:17:20.228193 - epoch   28 | avg train utts/s  2539 | took 109.70 s
+:::MLLOG {"namespace": "", "time_ms": 1684426640228, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2538.9963647025943}, "metadata": {"file": "train.py", "lineno": 905, "step": 28}}
+:::MLLOG {"namespace": "", "time_ms": 1684426640228, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 28}}
+:::MLLOG {"namespace": "", "time_ms": 1684426641401, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06315944266754898, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 28}}
+:::MLLOG {"namespace": "", "time_ms": 1684426641402, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 28}}
+DLL 2023-05-18 16:17:21.402251 - epoch   28 |   dev ema wer   6.32 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684426641402, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 28}}
+:::MLLOG {"namespace": "", "time_ms": 1684426641402, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 29, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426641402, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 29}}
+:::MLLOG {"namespace": "", "time_ms": 1684426751248, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 29}}
+DLL 2023-05-18 16:19:11.248588 - epoch   29 | avg train utts/s  2536 | took 109.85 s
+:::MLLOG {"namespace": "", "time_ms": 1684426751248, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2535.626314804554}, "metadata": {"file": "train.py", "lineno": 905, "step": 29}}
+:::MLLOG {"namespace": "", "time_ms": 1684426751248, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 29}}
+:::MLLOG {"namespace": "", "time_ms": 1684426752427, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06328811440755855, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 29}}
+:::MLLOG {"namespace": "", "time_ms": 1684426752427, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 29}}
+DLL 2023-05-18 16:19:12.427877 - epoch   29 |   dev ema wer   6.33 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684426752428, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 29}}
+:::MLLOG {"namespace": "", "time_ms": 1684426752428, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 30, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426752428, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 30}}
+DLL 2023-05-18 16:19:57.661529 - epoch   30 | iter  224/544 | loss   25.45 | utts/s    11 | took 45.18 s | lrate 1.25e-03
+:::MLLOG {"namespace": "", "time_ms": 1684426862213, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 30}}
+DLL 2023-05-18 16:21:02.213815 - epoch   30 | avg train utts/s  2537 | took 109.79 s
+:::MLLOG {"namespace": "", "time_ms": 1684426862213, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2537.0213805139397}, "metadata": {"file": "train.py", "lineno": 905, "step": 30}}
+:::MLLOG {"namespace": "", "time_ms": 1684426862213, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 30}}
+:::MLLOG {"namespace": "", "time_ms": 1684426863386, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.0621116870703283, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 30}}
+:::MLLOG {"namespace": "", "time_ms": 1684426863386, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 30}}
+DLL 2023-05-18 16:21:03.386851 - epoch   30 |   dev ema wer   6.21 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684426863387, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 30}}
+:::MLLOG {"namespace": "", "time_ms": 1684426863387, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 31, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426863387, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 31}}
+:::MLLOG {"namespace": "", "time_ms": 1684426973429, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 31}}
+DLL 2023-05-18 16:22:53.429836 - epoch   31 | avg train utts/s  2531 | took 110.04 s
+:::MLLOG {"namespace": "", "time_ms": 1684426973429, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2531.09570868222}, "metadata": {"file": "train.py", "lineno": 905, "step": 31}}
+:::MLLOG {"namespace": "", "time_ms": 1684426973429, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 31}}
+:::MLLOG {"namespace": "", "time_ms": 1684426974608, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06198301533031874, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 31}}
+:::MLLOG {"namespace": "", "time_ms": 1684426974608, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 31}}
+DLL 2023-05-18 16:22:54.608437 - epoch   31 |   dev ema wer   6.20 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684426974608, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 31}}
+:::MLLOG {"namespace": "", "time_ms": 1684426974608, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 32, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684426974608, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 32}}
+DLL 2023-05-18 16:23:22.045442 - epoch   32 | iter  136/544 | loss   22.19 | utts/s    19 | took 27.39 s | lrate 1.05e-03
+:::MLLOG {"namespace": "", "time_ms": 1684427084160, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 32}}
+DLL 2023-05-18 16:24:44.160677 - epoch   32 | avg train utts/s  2542 | took 109.55 s
+:::MLLOG {"namespace": "", "time_ms": 1684427084160, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2542.4333926019526}, "metadata": {"file": "train.py", "lineno": 905, "step": 32}}
+:::MLLOG {"namespace": "", "time_ms": 1684427084160, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 32}}
+:::MLLOG {"namespace": "", "time_ms": 1684427085327, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06071467960736738, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 32}}
+:::MLLOG {"namespace": "", "time_ms": 1684427085327, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 32}}
+DLL 2023-05-18 16:24:45.327872 - epoch   32 |   dev ema wer   6.07 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427085328, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 32}}
+:::MLLOG {"namespace": "", "time_ms": 1684427085328, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 33, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427085328, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 33}}
+:::MLLOG {"namespace": "", "time_ms": 1684427194916, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 33}}
+DLL 2023-05-18 16:26:34.917015 - epoch   33 | avg train utts/s  2542 | took 109.59 s
+:::MLLOG {"namespace": "", "time_ms": 1684427194917, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2541.5779884077238}, "metadata": {"file": "train.py", "lineno": 905, "step": 33}}
+:::MLLOG {"namespace": "", "time_ms": 1684427194917, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 33}}
+:::MLLOG {"namespace": "", "time_ms": 1684427196092, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.06075144296165582, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 33}}
+:::MLLOG {"namespace": "", "time_ms": 1684427196092, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 33}}
+DLL 2023-05-18 16:26:36.092658 - epoch   33 |   dev ema wer   6.08 | took  1.18 s
+:::MLLOG {"namespace": "", "time_ms": 1684427196092, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 33}}
+:::MLLOG {"namespace": "", "time_ms": 1684427196093, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 34, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427196093, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 34}}
+DLL 2023-05-18 16:26:45.772602 - epoch   34 | iter   48/544 | loss   21.56 | utts/s    53 | took  9.64 s | lrate 8.78e-04
+:::MLLOG {"namespace": "", "time_ms": 1684427305599, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 34}}
+DLL 2023-05-18 16:28:25.599367 - epoch   34 | avg train utts/s  2543 | took 109.51 s
+:::MLLOG {"namespace": "", "time_ms": 1684427305599, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2543.490232359456}, "metadata": {"file": "train.py", "lineno": 905, "step": 34}}
+:::MLLOG {"namespace": "", "time_ms": 1684427305599, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 34}}
+:::MLLOG {"namespace": "", "time_ms": 1684427306766, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.060953641410242274, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 34}}
+:::MLLOG {"namespace": "", "time_ms": 1684427306766, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 34}}
+DLL 2023-05-18 16:28:26.766976 - epoch   34 |   dev ema wer   6.10 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427306767, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 34}}
+:::MLLOG {"namespace": "", "time_ms": 1684427306767, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 35, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427306767, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 35}}
+DLL 2023-05-18 16:30:08.292135 - epoch   35 | iter  504/544 | loss   20.53 | utts/s     5 | took 101.47 s | lrate 8.04e-04
+:::MLLOG {"namespace": "", "time_ms": 1684427416270, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 35}}
+DLL 2023-05-18 16:30:16.271045 - epoch   35 | avg train utts/s  2544 | took 109.50 s
+:::MLLOG {"namespace": "", "time_ms": 1684427416271, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2543.5522563916015}, "metadata": {"file": "train.py", "lineno": 905, "step": 35}}
+:::MLLOG {"namespace": "", "time_ms": 1684427416271, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 35}}
+:::MLLOG {"namespace": "", "time_ms": 1684427417437, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.05986912245873313, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 35}}
+:::MLLOG {"namespace": "", "time_ms": 1684427417437, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 35}}
+DLL 2023-05-18 16:30:17.437804 - epoch   35 |   dev ema wer   5.99 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427417438, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 35}}
+:::MLLOG {"namespace": "", "time_ms": 1684427417438, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 36, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427417438, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 36}}
+:::MLLOG {"namespace": "", "time_ms": 1684427527142, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 36}}
+DLL 2023-05-18 16:32:07.143245 - epoch   36 | avg train utts/s  2539 | took 109.70 s
+:::MLLOG {"namespace": "", "time_ms": 1684427527143, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2538.8847590207215}, "metadata": {"file": "train.py", "lineno": 905, "step": 36}}
+:::MLLOG {"namespace": "", "time_ms": 1684427527143, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 36}}
+:::MLLOG {"namespace": "", "time_ms": 1684427528314, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.059262527112973785, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 36}}
+:::MLLOG {"namespace": "", "time_ms": 1684427528314, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 36}}
+DLL 2023-05-18 16:32:08.314538 - epoch   36 |   dev ema wer   5.93 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427528314, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 36}}
+:::MLLOG {"namespace": "", "time_ms": 1684427528314, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 37, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427528315, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 37}}
+DLL 2023-05-18 16:33:32.202586 - epoch   37 | iter  416/544 | loss   19.92 | utts/s     6 | took 83.83 s | lrate 6.73e-04
+:::MLLOG {"namespace": "", "time_ms": 1684427638054, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 37}}
+DLL 2023-05-18 16:33:58.055231 - epoch   37 | avg train utts/s  2538 | took 109.74 s
+:::MLLOG {"namespace": "", "time_ms": 1684427638055, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2538.0689715935573}, "metadata": {"file": "train.py", "lineno": 905, "step": 37}}
+:::MLLOG {"namespace": "", "time_ms": 1684427638055, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 37}}
+:::MLLOG {"namespace": "", "time_ms": 1684427639220, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.058784603507224, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 37}}
+:::MLLOG {"namespace": "", "time_ms": 1684427639221, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 37}}
+DLL 2023-05-18 16:33:59.221353 - epoch   37 |   dev ema wer   5.88 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427639221, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 37}}
+:::MLLOG {"namespace": "", "time_ms": 1684427639221, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 38, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427639221, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 38}}
+:::MLLOG {"namespace": "", "time_ms": 1684427748835, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 38}}
+DLL 2023-05-18 16:35:48.836276 - epoch   38 | avg train utts/s  2541 | took 109.61 s
+:::MLLOG {"namespace": "", "time_ms": 1684427748836, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2540.980953340447}, "metadata": {"file": "train.py", "lineno": 905, "step": 38}}
+:::MLLOG {"namespace": "", "time_ms": 1684427748836, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 38}}
+:::MLLOG {"namespace": "", "time_ms": 1684427749999, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.058784603507224, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 38}}
+:::MLLOG {"namespace": "", "time_ms": 1684427749999, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 38}}
+DLL 2023-05-18 16:35:49.999859 - epoch   38 |   dev ema wer   5.88 | took  1.16 s
+:::MLLOG {"namespace": "", "time_ms": 1684427750000, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 38}}
+:::MLLOG {"namespace": "", "time_ms": 1684427750000, "event_type": "INTERVAL_START", "key": "block_start", "value": null, "metadata": {"file": "train.py", "lineno": 800, "first_epoch_num": 39, "epoch_count": 1}}
+:::MLLOG {"namespace": "", "time_ms": 1684427750000, "event_type": "INTERVAL_START", "key": "epoch_start", "value": null, "metadata": {"file": "train.py", "lineno": 803, "epoch_num": 39}}
+DLL 2023-05-18 16:36:56.251802 - epoch   39 | iter  328/544 | loss   19.16 | utts/s     8 | took 66.20 s | lrate 5.63e-04
+:::MLLOG {"namespace": "", "time_ms": 1684427859752, "event_type": "INTERVAL_END", "key": "epoch_stop", "value": null, "metadata": {"file": "train.py", "lineno": 898, "epoch_num": 39}}
+DLL 2023-05-18 16:37:39.753291 - epoch   39 | avg train utts/s  2538 | took 109.75 s
+:::MLLOG {"namespace": "", "time_ms": 1684427859753, "event_type": "POINT_IN_TIME", "key": "tracked_stats", "value": {"throughput": 2537.7732108557198}, "metadata": {"file": "train.py", "lineno": 905, "step": 39}}
+:::MLLOG {"namespace": "", "time_ms": 1684427859753, "event_type": "INTERVAL_START", "key": "eval_start", "value": null, "metadata": {"file": "train.py", "lineno": 250, "epoch_num": 39}}
+:::MLLOG {"namespace": "", "time_ms": 1684427860925, "event_type": "POINT_IN_TIME", "key": "eval_accuracy", "value": 0.05779199294143598, "metadata": {"file": "train.py", "lineno": 270, "epoch_num": 39}}
+:::MLLOG {"namespace": "", "time_ms": 1684427860925, "event_type": "INTERVAL_END", "key": "eval_stop", "value": null, "metadata": {"file": "train.py", "lineno": 271, "epoch_num": 39}}
+DLL 2023-05-18 16:37:40.925531 - epoch   39 |   dev ema wer   5.78 | took  1.17 s
+:::MLLOG {"namespace": "", "time_ms": 1684427860925, "event_type": "INTERVAL_END", "key": "block_stop", "value": null, "metadata": {"file": "train.py", "lineno": 927, "first_epoch_num": 39}}
+:::MLLOG {"namespace": "", "time_ms": 1684427860925, "event_type": "INTERVAL_END", "key": "run_stop", "value": null, "metadata": {"file": "train.py", "lineno": 933, "status": "success"}}
+Finished after 39 epochs (target reached).
+DLL 2023-05-18 16:37:40.926081 -  | avg train utts/s  2514
++ ret_code=0
++ set +x
+ENDING TIMING RUN AT 2023-05-18 04:37:47 PM
+RESULT,RNN_SPEECH_RECOGNITION,,4340,nvidia,2023-05-18 03:25:27 PM
+ENDING TIMING RUN AT 2023-05-18 04:37:47 PM
+RESULT,RNN_SPEECH_RECOGNITION,,4340,nvidia,2023-05-18 03:25:27 PM

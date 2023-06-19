@@ -1,0 +1,609 @@
+diff --git a/csrc/cpu/aten/optimizer/LarsFusedStep.cpp b/csrc/cpu/aten/optimizer/LarsFusedStep.cpp
+new file mode 100644
+index 00000000..6f4157c8
+--- /dev/null
++++ b/csrc/cpu/aten/optimizer/LarsFusedStep.cpp
+@@ -0,0 +1,182 @@
++#include "optimizer.h"
++
++#include <torch/all.h>
++#include <torch/csrc/autograd/function.h>
++
++#include "omp.h"
++#include <cmath>
++
++namespace torch_ipex {
++namespace cpu {
++
++float norm_fro(const at::Tensor& input_tensor) {
++    int input_size=input_tensor.numel();
++
++    float* input_pointer = input_tensor.data_ptr<float>();
++    float sum_square = 0.f;
++    int num_threads = omp_get_max_threads();
++    int local_size = (input_size+num_threads-1)/num_threads;
++
++    float scratchpad[num_threads] = {0.f};
++    // Reduce to scratchpad
++    #pragma omp parallel
++    {
++        int threadId = omp_get_thread_num();
++        int local_start = local_size*threadId;
++        float* local_pointer = input_pointer + local_start;
++        float local_value = 0.f;
++        int local_ind = 0;
++        while ((local_ind<local_size) && (local_start+local_ind<input_size)) {
++            local_value += local_pointer[local_ind]*local_pointer[local_ind];
++
++            local_ind ++;
++        }
++        scratchpad[threadId] = local_value;
++    }
++    for (int i=0; i<num_threads; i++) {
++        sum_square += scratchpad[i];
++    }
++    return std::sqrt(sum_square);
++}
++
++#ifdef __AVX512F__
++const int Block_Size = 16;
++const int Num_Blocks_Thread = 16;
++const int Grid_Size = Block_Size*Num_Blocks_Thread;
++
++float norm_fro_avx512(const at::Tensor& input_tensor) {
++    int input_size=1;
++    at::IntArrayRef input_sizes = input_tensor.sizes();
++    for (int i=0; i<input_sizes.size(); i++){
++        input_size *= input_sizes[i];
++    }
++
++    float* input_pointer = input_tensor.data_ptr<float>();
++    float sum_square = 0.f;
++
++    const int Num_Grids = (input_size+Grid_Size-1) / Grid_Size;
++
++    float scratchpad[Num_Grids] = {0.f};
++
++    #pragma omp parallel for
++    for (int grid=0; grid<Num_Grids; grid++) {
++        int local_start = grid * Grid_Size;
++        float* local_pointer = input_pointer + local_start;
++        int local_ind = 0;
++        __m512 acc_reg = _mm512_setzero_ps();
++        __m512 mul_reg;
++        while ((local_ind+Block_Size-1<Grid_Size) && (local_start+local_ind+Block_Size-1<input_size)) {
++            mul_reg = _mm512_load_ps(local_pointer+local_ind);
++            acc_reg = _mm512_fmadd_ps(mul_reg, mul_reg, acc_reg);
++            local_ind += Block_Size;
++        }
++        float local_value = _mm512_reduce_add_ps(acc_reg);
++        while ((local_ind<Grid_Size) && (local_start+local_ind<input_size)) {
++            local_value += local_pointer[local_ind]*local_pointer[local_ind];
++            local_ind++;
++        }
++        scratchpad[grid] = local_value;
++    }
++    for (int i=0; i<Num_Grids; i++) {
++        sum_square += scratchpad[i];
++    }
++    return std::sqrt(sum_square);
++}
++#endif
++
++/**
++ * LARS fused update kernel.
++ * Support Double, Float, BFloat16 training
++ *@param param_ Parameters to be update
++ *@param grad_ Grad used to update Parameters
++ *@param momentum_buf_ momentum to accelerate convergence
++ *@param param2_ Used for BF16 training, if param_ is float, param2_ is bf16
++ *params need to be synced after update if param_ is BFloat16, param2_ is
++ *params_ last 16 bit matissa to construct float params
++ *@param momentum Args for momentum.
++ *@param learning_rate  Weight for grad while update.
++ *@param eeta Trust coefficient
++ *@param eps Prevent division by zero
++ *@param weight_decay Args for regularization to avoid over-fit.
++ *@param dampening Attribute for momentum.
++ *@param nesterov Attribute for momentum.
++ */
++c10::optional<at::Tensor> lars_fused_step(
++    at::Tensor& param_,
++    const at::Tensor& grad_,
++    const c10::optional<at::Tensor>& momentum_buf_,
++    at::Tensor& param2_,
++    double momentum,
++    double learning_rate,
++    double eeta,
++    double eps,
++    double weight_decay,
++    double dampening,
++    bool nesterov) {
++  RECORD_FUNCTION("torch_ipex::lars_fused_step", c10::ArrayRef<c10::IValue>({}));
++
++  TORCH_CHECK(
++      weight_decay >= 0, "Expect weight_decay >= 0.0, got ", weight_decay);
++
++  TORCH_CHECK(
++      param_.sizes() == grad_.sizes(),
++      "Expect param and grad_ have the same sizes, param sizes: ",
++      param_.sizes(),
++      "; grad_ sizes: ",
++      grad_.sizes());
++  TORCH_CHECK(
++      !momentum_buf_.has_value() ||
++          param_.sizes() == momentum_buf_.value().sizes(),
++      "Expect param and momentum_buf have the same sizes, param sizes: ",
++      param_.sizes(),
++      "; momentum_buf sizes: ",
++      momentum_buf_.value().sizes());
++  TORCH_CHECK(
++      param2_.numel() == 0 || param_.sizes() == param2_.sizes(),
++      "Expect param and param2_ have the same sizes, param sizes: ",
++      param_.sizes(),
++      "; param2_ sizes: ",
++      param2_.sizes());
++
++
++  at::Tensor grad_f32 = grad_.to(torch::kFloat32);
++#ifdef __AVX512F__
++  float w_norm = norm_fro_avx512(param_);
++  float g_norm = norm_fro_avx512(grad_f32);
++#else
++  float w_norm = norm_fro(param_);
++  float g_norm = norm_fro(grad_f32);
++#endif
++
++  float trust_ratio = 1.f;
++  if ((w_norm>0) && (g_norm>0)) {
++    trust_ratio = eeta*w_norm/(g_norm + weight_decay*w_norm + eps);
++  }
++  learning_rate *= trust_ratio;
++  return sgd_fused_step_kernel_stub(
++      kCPU,
++      param_,
++      grad_,
++      momentum_buf_,
++      param2_,
++      momentum,
++      learning_rate,
++      weight_decay,
++      dampening,
++      nesterov);
++}
++
++} // namespace cpu
++} // namespace torch_ipex
++
++namespace {
++
++TORCH_LIBRARY_FRAGMENT(torch_ipex, m) {
++  m.def(
++      "lars_fused_step(Tensor param, Tensor grad, Tensor? momentum_buf, Tensor "
++      "trail, float momentum, float learning_rate, float eeta, float eps,"
++      "float weight_decay, float dampening, bool nesterov) -> Tensor?",
++      torch_ipex::cpu::lars_fused_step);
++}
++
++} // namespace
+diff --git a/intel_extension_for_pytorch/optim/__init__.py b/intel_extension_for_pytorch/optim/__init__.py
+index 8b137891..51b19710 100644
+--- a/intel_extension_for_pytorch/optim/__init__.py
++++ b/intel_extension_for_pytorch/optim/__init__.py
+@@ -1 +1 @@
+-
++from . import _optimizer_utils
+diff --git a/intel_extension_for_pytorch/optim/_functional.py b/intel_extension_for_pytorch/optim/_functional.py
+index e161b66b..984a1fb3 100644
+--- a/intel_extension_for_pytorch/optim/_functional.py
++++ b/intel_extension_for_pytorch/optim/_functional.py
+@@ -313,6 +313,65 @@ def _single_tensor_sgd(params: List[Tensor],
+                 nesterov
+             )
+
++def _single_tensor_lars(params: List[Tensor],
++                      params2: List[Tensor],
++                      grads: List[Tensor],
++                      momentum_buffer_list: List[Optional[Tensor]],
++                      *,
++                      eeta: float,
++                      eps: float,
++                      weight_decay: float,
++                      momentum: float,
++                      lr: float,
++                      dampening: float,
++                      nesterov: bool,
++                      maximize: bool,
++                      has_sparse_grad: bool,
++                      fused: bool):
++    if maximize:
++        lr = -lr
++
++    # total_time = 0
++    for i, param in enumerate(params):
++
++        # if not grads[i].is_sparse:
++        momentum_buffer_list[i] = torch.ops.torch_ipex.lars_fused_step(
++            param,
++            grads[i],
++            momentum_buffer_list[i],
++            params2[i],
++            momentum,
++            lr,
++            eeta,
++            eps,
++            weight_decay,
++            dampening,
++            nesterov)
++            # continue
++
++        # if (
++        #     param.dtype == torch.bfloat16 and
++        #     grads[i].is_sparse and
++        #     grads[i].dtype == torch.bfloat16 and
++        #     weight_decay == 0 and
++        #     momentum == 0
++        # ):
++        #     # packed_add can support sparse tensor
++        #     torch.ops.torch_ipex.packed_add(param, params2[i], grads[i], alpha=-lr)
++        # else:
++        #     # no special optimize for other non fused case, fall back to naive implementation
++        #     grads[i] = grads[i].to(param.dtype)
++        #     momentum_buffer_list[i] = _sgd_non_fused_micro_step(
++        #         param,
++        #         grads[i],
++        #         momentum_buffer_list[i],
++        #         momentum,
++        #         lr,
++        #         weight_decay,
++        #         dampening,
++        #         nesterov
++        #     )
++
+ # keep this function here if enable fused_foreach_sgd_later
+ def _multi_tensor_sgd(params: List[Tensor],
+                       params2: List[Tensor],
+@@ -448,6 +507,127 @@ def sgd_step(self, closure=None):
+
+     return loss
+
++def lars(params: List[Tensor],
++        params2: List[Tensor],
++        d_p_list: List[Tensor],
++        momentum_buffer_list: List[Optional[Tensor]],
++        # kwonly args with defaults are not supported by functions compiled with torchscript issue #70627
++        # setting this as kwarg for now as functional API is compiled by torch/distributed/optim
++        has_sparse_grad: bool = None,
++        foreach: bool = None,
++        *,
++        eeta: float,
++        eps: float,
++        weight_decay: float,
++        momentum: float,
++        lr: float,
++        dampening: float,
++        nesterov: bool,
++        maximize: bool,
++        fused: bool):
++    r"""Functional API that performs LARS algorithm computation.
++    dampening = 0
++    nesterov = False
++    maximize = False
++    """
++
++    if foreach is None:
++        # Placeholder for more complex foreach logic to be added when value is not set
++        foreach = False
++
++    if foreach and torch.jit.is_scripting():
++        raise RuntimeError('torch.jit.script not supported with foreach optimizers')
++
++    func = _single_tensor_lars
++
++    func(params,
++         params2,
++         d_p_list,
++         momentum_buffer_list,
++         eeta=eeta,
++         eps=eps,
++         weight_decay=weight_decay,
++         momentum=momentum,
++         lr=lr,
++         dampening=dampening,
++         nesterov=nesterov,
++         has_sparse_grad=has_sparse_grad,
++         maximize=maximize,
++         fused=fused)
++
++@torch.no_grad()
++def lars_step(self, closure=None):
++    """Performs a single optimization step.
++    Args:
++        closure (callable, optional): A closure that reevaluates the model
++            and returns the loss.
++    """
++    loss = None
++    if closure is not None:
++        with torch.enable_grad():
++            loss = closure()
++
++    for group in self.param_groups:
++        params_with_grad = []
++        params2 = []
++        d_p_list = []
++        momentum_buffer_list = []
++        has_sparse_grad = False
++
++        for p in group['params']:
++            grad = get_bf16_grad(p, self.params_attr) if is_master_weight(p, self.params_attr) else p.grad
++            if grad is not None:
++                params_with_grad.append(p)
++                d_p_list.append(grad)
++                if grad.is_sparse:
++                    has_sparse_grad = True
++
++                state = self.state[p]
++                if 'momentum_buffer' not in state:
++                    momentum_buffer_list.append(None)
++                else:
++                    momentum_buffer_list.append(state['momentum_buffer'])
++
++                param2 = get_param2(p, self.params_attr)
++                params2.append(param2)
++        if group['lars']:
++            lars(params_with_grad,
++                params2,
++                d_p_list,
++                momentum_buffer_list,
++                eeta=group['eeta'],
++                eps=group['epsilon'],
++                weight_decay=group['weight_decay'],
++                momentum=group['momentum'],
++                lr=group['lr'],
++                dampening=0,
++                nesterov=0,
++                maximize=0,
++                has_sparse_grad=has_sparse_grad,
++                foreach=None,
++                fused=self.fused)
++        else:
++            sgd(params_with_grad,
++                params2,
++                d_p_list,
++                momentum_buffer_list,
++                weight_decay=group['weight_decay'],
++                momentum=group['momentum'],
++                lr=group['lr'],
++                dampening=0,
++                nesterov=0,
++                maximize=0,
++                has_sparse_grad=has_sparse_grad,
++                foreach=None,
++                fused=self.fused)
++
++        # update momentum_buffers in state
++        for p, momentum_buffer in zip(params_with_grad, momentum_buffer_list):
++            state = self.state[p]
++            state['momentum_buffer'] = momentum_buffer
++
++    return loss
++
+ def _lamb_fused_impl(
+     params: List[Tensor],
+     grads: List[Tensor],
+diff --git a/intel_extension_for_pytorch/optim/_lars.py b/intel_extension_for_pytorch/optim/_lars.py
+new file mode 100644
+index 00000000..f0a03fb0
+--- /dev/null
++++ b/intel_extension_for_pytorch/optim/_lars.py
+@@ -0,0 +1,165 @@
++import torch
++from torch.optim.optimizer import Optimizer
++from typing import Dict, Iterable, Optional, Callable, Tuple
++from torch import nn
++
++"""
++    We recommend using create_optimizer_lars and setting bn_bias_separately=True
++    instead of using class Lars directly, which helps LARS skip parameters
++    in BatchNormalization and bias, and has better performance in general.
++    Polynomial Warmup learning rate decay is also helpful for better performance in general.
++"""
++
++def create_optimizer_lars(model, lr, momentum, weight_decay, bn_bias_separately, epsilon):
++    if bn_bias_separately:
++        optimizer = Lars([
++            dict(params=get_common_parameters(model, exclude_func=get_norm_bias_parameters)),
++            dict(params=get_norm_parameters(model), weight_decay=0, lars=False),
++            dict(params=get_bias_parameters(model, exclude_func=get_norm_parameters), lars=False)],
++            lr=lr,
++            momentum=momentum,
++            weight_decay=weight_decay,
++            epsilon=epsilon)
++    else:
++        optimizer = Lars(model.parameters(),
++                         lr=lr,
++                         momentum=momentum,
++                         weight_decay=weight_decay,
++                         epsilon=epsilon)
++    return optimizer
++
++
++class Lars(Optimizer):
++    r"""Implements the LARS optimizer from `"Large batch training of convolutional networks"
++    <https://arxiv.org/pdf/1708.03888.pdf>`_.
++    Args:
++        params (iterable): iterable of parameters to optimize or dicts defining
++            parameter groups
++        lr (float, optional): learning rate
++        momentum (float, optional): momentum factor (default: 0)
++        eeta (float, optional): LARS coefficient as used in the paper (default: 1e-3)
++        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)
++    """
++
++    def __init__(
++            self,
++            params: Iterable[torch.nn.Parameter],
++            lr=1e-3,
++            momentum=0,
++            eeta=1e-3,
++            weight_decay=0,
++            epsilon=0.0
++    ) -> None:
++        if not isinstance(lr, float) or lr < 0.0:
++            raise ValueError("Invalid learning rate: {}".format(lr))
++        if momentum < 0.0:
++            raise ValueError("Invalid momentum value: {}".format(momentum))
++        if weight_decay < 0.0:
++            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
++        if eeta <= 0 or eeta > 1:
++            raise ValueError("Invalid eeta value: {}".format(eeta))
++        if epsilon < 0:
++            raise ValueError("Invalid epsilon value: {}".format(epsilon))
++        defaults = dict(lr=lr, momentum=momentum,
++                        weight_decay=weight_decay, eeta=eeta, epsilon=epsilon, lars=True)
++
++        super().__init__(params, defaults)
++
++    @torch.no_grad()
++    def step(self, closure=None):
++        """Performs a single optimization step.
++        Arguments:
++            closure (callable, optional): A closure that reevaluates the model
++                and returns the loss.
++        """
++        # print("Using lars step?")
++        loss = None
++        if closure is not None:
++            with torch.enable_grad():
++                loss = closure()
++
++        for group in self.param_groups:
++            # print(len(group), group['lars'])
++            weight_decay = group['weight_decay']
++            momentum = group['momentum']
++            eeta = group['eeta']
++            lr = group['lr']
++            lars = group['lars']
++            eps = group['epsilon']
++
++            for index_p, p in enumerate(group['params']):
++                if p.grad is None:
++                    continue
++                decayed_grad = p.grad
++                scaled_lr = lr
++                if lars:
++                    w_norm = torch.norm(p)
++                    g_norm = torch.norm(p.grad)
++                    trust_ratio = torch.where(
++                        w_norm > 0 and g_norm > 0,
++                        eeta * w_norm / (g_norm + weight_decay * w_norm + eps),
++                        torch.ones_like(w_norm)
++                    )
++
++                if momentum != 0:
++                    param_state = self.state[p]
++                    if 'momentum_buffer' not in param_state:
++                        buf = param_state['momentum_buffer'] = torch.clone(
++                            decayed_grad).detach()
++                    else:
++                        buf = param_state['momentum_buffer']
++                        buf.mul_(momentum).add_(decayed_grad)
++                    decayed_grad = buf
++
++                p.add_(decayed_grad, alpha=-scaled_lr)
++        # print("Finished a normal step")
++        return loss
++
++
++"""
++    Functions which help to skip bias and BatchNorm
++"""
++BN_CLS = (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)
++
++
++def get_parameters_from_cls(module, cls_):
++    def get_members_fn(m):
++        if isinstance(m, cls_):
++            return m._parameters.items()
++        else:
++            return dict()
++
++    named_parameters = module._named_members(get_members_fn=get_members_fn)
++    for name, param in named_parameters:
++        yield param
++
++
++def get_norm_parameters(module):
++    return get_parameters_from_cls(module, (nn.LayerNorm, *BN_CLS))
++
++
++def get_bias_parameters(module, exclude_func=None):
++    excluded_parameters = set()
++    if exclude_func is not None:
++        for param in exclude_func(module):
++            excluded_parameters.add(param)
++    for name, param in module.named_parameters():
++        if param not in excluded_parameters and 'bias' in name:
++            yield param
++
++
++def get_norm_bias_parameters(module):
++    for param in get_norm_parameters(module):
++        yield param
++    for param in get_bias_parameters(module, exclude_func=get_norm_parameters):
++        yield param
++
++
++def get_common_parameters(module, exclude_func=None):
++    excluded_parameters = set()
++    if exclude_func is not None:
++        for param in exclude_func(module):
++            excluded_parameters.add(param)
++    for name, param in module.named_parameters():
++        if param not in excluded_parameters:
++            yield param
+diff --git a/intel_extension_for_pytorch/optim/_optimizer_utils.py b/intel_extension_for_pytorch/optim/_optimizer_utils.py
+index 3f7f2b1c..503a25db 100644
+--- a/intel_extension_for_pytorch/optim/_optimizer_utils.py
++++ b/intel_extension_for_pytorch/optim/_optimizer_utils.py
+@@ -5,15 +5,17 @@ import warnings
+ from copy import deepcopy
+ from itertools import chain
+ from collections import defaultdict
+-from ._functional import sgd_step, adagrad_step, lamb_step, adam_step, adamw_step
++from ._functional import sgd_step, adagrad_step, lamb_step, adam_step, adamw_step, lars_step
+ from ._lamb import Lamb
+ from ..nn import utils
++from ._lars import Lars
+
+ IPEX_FUSED_OPTIMIZER_LIST_CPU = [
+     torch.optim.SGD,
+     torch.optim.Adagrad,
+     torch.optim.Adam,
+     Lamb,
++    Lars,
+ ]
+
+ IPEX_FUSED_OPTIMIZER_LIST_XPU = [
+@@ -26,6 +28,7 @@ OPTIMIZER_FUSED_STEP_MAPPING_CPU = {
+     torch.optim.Adagrad: adagrad_step,
+     torch.optim.Adam: adam_step,
+     Lamb: lamb_step,
++    Lars: lars_step
+ }
+
+ # TODO: For align frontend and pass build, the xpu code is temp commented
+@@ -331,7 +334,12 @@ def optimizer_fusion(optimizer, master_weight_split, is_xpu=False):
+         setattr(optimizer, 'params_attr', {})
+     try:
+         if not is_xpu:
+-            step = OPTIMIZER_FUSED_STEP_MAPPING_CPU[type(optimizer)]
++            # Workaround for Lars optimizer
++            # The way lars optimizer is created changes the class to _lars.Lars, which causes issues
++            if "Lars" in str(type(optimizer)):
++                step = OPTIMIZER_FUSED_STEP_MAPPING_CPU[Lars]
++            else:
++                step = OPTIMIZER_FUSED_STEP_MAPPING_CPU[type(optimizer)]
+         else:
+             step = OPTIMIZER_FUSED_STEP_MAPPING_XPU[type(optimizer)]
+         if not hasattr(optimizer, '_original_step'):
