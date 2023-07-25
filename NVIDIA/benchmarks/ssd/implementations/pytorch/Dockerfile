@@ -70,11 +70,11 @@ RUN apt-get update && \
 WORKDIR /workspace/ssd
 
 # Install latest Apex for updated FusedAdam optimizer
+RUN pip install --upgrade pip==23.2.1
 RUN git clone https://github.com/NVIDIA/apex.git && \
     cd apex && \
-    pip install -v --no-cache-dir --disable-pip-version-check --global-option="--cpp_ext" \
-                   --global-option="--cuda_ext" --global-option="--focal_loss" \
-                   --global-option="--fused_conv_bias_relu" .
+    CFLAGS="-g0" pip install -v --no-build-isolation --no-cache-dir --disable-pip-version-check \
+    --config-settings "--build-option=--cpp_ext --cuda_ext --focal_loss --fused_conv_bias_relu" .
 
 # Copy code
 COPY . .
